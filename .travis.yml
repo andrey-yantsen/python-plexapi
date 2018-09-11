@@ -44,16 +44,31 @@ after_script:
 jobs:
   include:
     - python: 3.6
+      name: "Old Plex Server + one-off account tests"
       env:
         - PLEX_CONTAINER_TAG=1.3.2.3112-1751929
         - TEST_ACCOUNT_ONCE=1
+    - python: 3.6
+      name: "Client tests"
+      env:
+        - PLEX_CONTAINER_TAG=latest
+        - PLEXAPI_AUTH_CLIENT_BASEURL=http://localhost:32433
+      install:
+        - pip install -r requirements_dev.txt
+        - PYTHONPATH="$PWD:$PYTHONPATH" python -u tools/plex-bootstraptest.py --destination plex --advertise-ip=127.0.0.1
+          --bootstrap-timeout 540 --docker-tag $PLEX_CONTAINER_TAG --accept-eula
+        - docker pull selenium/standalone-firefox
+        - PYTHONPATH="$PWD:$PYTHONPATH" python -u tools/plex-bootstraptestclient.py --pin=$CLIENT_PIN
+      script:
+        - py.test tests -rxXs --verbose -m client
+      after_success: skip
     - python: 3.6
       name: "Flake8"
       install:
         - pip install -r requirements_dev.txt
       script: flake8 plexapi --exclude=compat.py --max-line-length=120 --ignore=E128,E701,E702,E731,W293
-      after_success: true
-      after_script: true
+      after_success: skip
+      after_script: skip
       env:
         - PLEX_CONTAINER_TAG=latest
     - stage: deploy

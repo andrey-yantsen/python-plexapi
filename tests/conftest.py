@@ -43,13 +43,10 @@ RESOLUTIONS = {'sd', '480', '576', '720', '1080'}
 ENTITLEMENTS = {'ios', 'cpms', 'roku', 'android', 'xbox_one', 'xbox_360', 'windows', 'windows_phone'}
 
 
-def pytest_addoption(parser):
-    parser.addoption('--client', action='store_true', default=False, help='Run client tests.')
-
-
 def pytest_runtest_setup(item):
-    if 'client' in item.keywords and not item.config.getvalue('client'):
-        return pytest.skip('Need --client option to run.')
+    if 'client' in item.keywords and not (CLIENT_BASEURL and CLIENT_TOKEN):
+        return pytest.skip('You should provide PLEXAPI_AUTH_CLIENT_BASEURL and PLEXAPI_AUTH_CLIENT_TOKEN to run client '
+                           'tests')
 
 
 # ---------------------------------
@@ -127,8 +124,8 @@ def plex2():
 
 
 @pytest.fixture()
-def client(request):
-    return PlexClient(plex(), baseurl=CLIENT_BASEURL, token=CLIENT_TOKEN)
+def client(plex):
+    return PlexClient(plex, baseurl=CLIENT_BASEURL, token=CLIENT_TOKEN)
 
 
 @pytest.fixture()

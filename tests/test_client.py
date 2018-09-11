@@ -6,7 +6,7 @@ def _check_capabilities(client, capabilities):
     supported = client.protocolCapabilities
     for capability in capabilities:
         if capability not in supported:
-            pytest.skip('Client doesnt support %s capability.', capability)
+            pytest.skip('Client doesnt support %s capability.' % capability)
 
 
 def _check_proxy(plex, client, proxy):

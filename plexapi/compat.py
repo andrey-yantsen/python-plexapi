@@ -35,6 +35,11 @@ except ImportError:
     from urllib import unquote
 
 try:
+    from urllib.parse import parse_qsl
+except ImportError:
+    from urlparse import parse_qsl
+
+try:
     from configparser import ConfigParser
 except ImportError:
     from ConfigParser import ConfigParser

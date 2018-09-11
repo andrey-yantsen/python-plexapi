@@ -3,6 +3,8 @@
 """
 Remove current Plex Server and a Client from MyPlex account. Useful when running tests in CI.
 """
+from os import environ
+
 from plexapi.myplex import MyPlexAccount
 from plexapi.server import PlexServer
 from plexapi import X_PLEX_IDENTIFIER
@@ -13,12 +15,20 @@ if __name__ == '__main__':
     plex = PlexServer(token=myplex.authenticationToken)
     for device in plex.myPlexAccount().devices():
         if device.clientIdentifier == plex.machineIdentifier:
-            print('Removing device "%s", with id "%s"' % (device.name, device. clientIdentifier))
+            print('Removing device "%s", with id "%s"' % (device.name, device.clientIdentifier))
             device.delete()
+
+    client_token = environ.get('PLEXAPI_AUTH_CLIENT_TOKEN')
+    if client_token:
+        for device in plex.myPlexAccount().devices():
+            if device.token == client_token:
+                print('Removing device "%s", with id "%s"' % (device.name, device.clientIdentifier))
+                device.delete()
+                break
 
     # If we suddenly remove the client first we wouldn't be able to authenticate to delete the server
     for device in plex.myPlexAccount().devices():
         if device.clientIdentifier == X_PLEX_IDENTIFIER:
-            print('Removing device "%s", with id "%s"' % (device.name, device. clientIdentifier))
+            print('Removing device "%s", with id "%s"' % (device.name, device.clientIdentifier))
             device.delete()
             break

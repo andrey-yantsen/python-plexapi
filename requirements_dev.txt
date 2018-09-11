@@ -16,3 +16,4 @@ sphinx-rtd-theme
 sphinxcontrib-napoleon
 tqdm
 websocket-client==0.48.0
+selenium
