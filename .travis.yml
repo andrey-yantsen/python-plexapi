@@ -26,6 +26,7 @@ before_install:
   - pip install --upgrade pytest pytest-cov coveralls
 install:
   - pip install -r requirements_dev.txt
+  - docker network create plex-test
   - PYTHONPATH="$PWD:$PYTHONPATH" python -u tools/plex-bootstraptest.py --destination plex --advertise-ip=127.0.0.1
     --bootstrap-timeout 540 --docker-tag $PLEX_CONTAINER_TAG
 

@@ -201,26 +201,27 @@ def test_server_check_for_update(plex, mocker):
 
 
 @pytest.mark.client
-def test_server_clients(plex):
-    assert len(plex.clients())
-    client = plex.clients()[0]
-    assert client._baseurl == 'http://127.0.0.1:32400'
-    assert client.device is None
-    assert client.deviceClass == 'pc'
-    assert client.machineIdentifier == '89hgkrbqxaxmf45o1q2949ru'
-    assert client.model is None
-    assert client.platform is None
-    assert client.platformVersion is None
-    assert client.product == 'Plex Web'
-    assert client.protocol == 'plex'
-    assert client.protocolCapabilities == ['timeline', 'playback', 'navigation', 'mirror', 'playqueues']
-    assert client.protocolVersion == '1'
-    assert client._server._baseurl == 'http://138.68.157.5:32400'
-    assert client.state is None
-    assert client.title == 'Plex Web (Chrome)'
-    assert client.token is None
-    assert client.vendor is None
-    assert client.version == '2.12.5'
+def test_server_clients(plex, client):
+    clients = plex.clients()
+    assert len(clients)
+    test_client = clients[0]
+
+    assert test_client._baseurl
+    assert test_client.device is None
+    assert test_client.deviceClass == 'pc'
+    assert test_client.machineIdentifier
+    assert test_client.model is None
+    assert test_client.platform is None
+    assert test_client.platformVersion is None
+    assert test_client.product == 'Plex Web'
+    assert test_client.protocol == 'plex'
+    assert test_client.protocolCapabilities == ['timeline', 'playback', 'navigation', 'mirror', 'playqueues']
+    assert test_client.protocolVersion == '1'
+    assert test_client._server._baseurl == client._server._baseurl
+    assert test_client.state is None
+    assert test_client.title
+    assert test_client.vendor is None
+    assert test_client.version
 
 
 def test_server_account(plex):

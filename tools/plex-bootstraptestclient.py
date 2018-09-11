@@ -1,9 +1,9 @@
 import argparse
+import sys
 from subprocess import call
-from time import time, sleep
 
 from selenium import webdriver
-from selenium.common.exceptions import TimeoutException, NoSuchElementException
+from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver import DesiredCapabilities
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.expected_conditions import visibility_of_element_located
@@ -15,12 +15,13 @@ from plexapi.myplex import MyPlexAccount
 
 DOCKER_CMD = [
     'docker', 'run', '-d',
+    '--net', '%(network)s',
     '--name', 'plex-test-client',
     '--restart', 'on-failure',
     '-p', '4444:4444/tcp',
     '--shm-size', '2g',
     '-e', 'GRID_CLEAN_UP_CYCLE=600000',
-    'selenium/standalone-firefox'
+    'selenium/standalone-chrome'
 ]
 
 
@@ -62,30 +63,26 @@ if __name__ == '__main__':
                         required=True)
     parser.add_argument('--password', help='Your Plex password', default=CONFIG.get('auth.myplex_password'),
                         required=True)
-    parser.add_argument('--init-timeout', help='Selenium bootstrap timeout, int seconds', type=int, default=10)
+    parser.add_argument('--docker-network', help='Docker network name, where plex server is located',
+                        default='plex-test')
     parser.add_argument('--pin', help='If the user has a pin you should provide it')
     opts = parser.parse_args()
-    if call(['docker', 'pull', 'selenium/standalone-firefox']) != 0:
+    if call(['docker', 'pull', 'selenium/standalone-chrome'], stdout=sys.stderr) != 0:
         print('Got an error when executing docker pull!')
         exit(1)
 
-    exit_code = call(DOCKER_CMD)
+    arg_bindings = {
+        'network': opts.docker_network,
+    }
+
+    docker_cmd = [c % arg_bindings for c in DOCKER_CMD]
+
+    exit_code = call(docker_cmd, stdout=sys.stderr)
     if exit_code != 0:
         exit(exit_code)
 
-    start = time()
-    wd = None
-    while not wd and time() - start < opts.init_timeout:
-        try:
-            wd = webdriver.Remote(command_executor='http://127.0.0.1:4444/wd/hub',
-                                  desired_capabilities=DesiredCapabilities.FIREFOX)
-        except:
-            wd = None
-            sleep(1)
-
-    if not wd:
-        print('Container was unable to start within the time limit!')
-        exit(1)
+    wd = webdriver.Remote(command_executor='http://127.0.0.1:4444/wd/hub',
+                          desired_capabilities=DesiredCapabilities.CHROME)
 
     wd.get('https://app.plex.tv')
     btn = WebDriverWait(wd, 10).until(

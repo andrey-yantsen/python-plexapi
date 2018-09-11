@@ -220,6 +220,7 @@ class PlexServer(PlexObject):
                 ports = self._myPlexClientPorts() if ports is None else ports
                 port = ports.get(elem.attrib.get('machineIdentifier'))
             baseurl = 'http://%s:%s' % (elem.attrib['host'], port)
+            # TODO: Probably we shouldn't pass server's token into Client
             items.append(PlexClient(baseurl=baseurl, server=self,
                                     token=self._token, data=elem, connect=False))
 

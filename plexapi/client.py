@@ -447,14 +447,14 @@ class PlexClient(PlexObject):
         server_url = media._server._baseurl.split(':')
         server_port = server_url[-1].strip('/')
 
-        if self.product != 'OpenPHT':
+        if not hasattr(self, 'product') or self.product != 'OpenPHT':
             try:
                 self.sendCommand('timeline/subscribe', port=server_port, protocol='http')
             except:  # noqa: E722
                 # some clients dont need or like this and raises http 400.
                 # We want to include the exception in the log,
                 # but it might still work so we swallow it.
-                log.exception('%s failed to subscribe ' % self.title)
+                log.exception('failed to subscribe')
 
         playqueue = media if isinstance(media, PlayQueue) else self._server.createPlayQueue(media)
         self.sendCommand('playback/playMedia', **dict({

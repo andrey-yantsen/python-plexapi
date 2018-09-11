@@ -44,9 +44,8 @@ ENTITLEMENTS = {'ios', 'cpms', 'roku', 'android', 'xbox_one', 'xbox_360', 'windo
 
 
 def pytest_runtest_setup(item):
-    if 'client' in item.keywords and not (CLIENT_BASEURL and CLIENT_TOKEN):
-        return pytest.skip('You should provide PLEXAPI_AUTH_CLIENT_BASEURL and PLEXAPI_AUTH_CLIENT_TOKEN to run client '
-                           'tests')
+    if 'client' in item.keywords and not CLIENT_TOKEN:
+        return pytest.skip('You should provide PLEXAPI_AUTH_CLIENT_TOKEN to run most of client tests')
 
 
 # ---------------------------------
@@ -124,8 +123,16 @@ def plex2():
 
 
 @pytest.fixture()
-def client(plex):
+def client_connected(plex):
+    if not CLIENT_BASEURL:
+        return pytest.skip('You should provide PLEXAPI_AUTH_CLIENT_BASEURL and PLEXAPI_AUTH_CLIENT_TOKEN to run this '
+                           'client test')
     return PlexClient(plex, baseurl=CLIENT_BASEURL, token=CLIENT_TOKEN)
+
+
+@pytest.fixture()
+def client(plex):
+    return PlexClient(plex, token=CLIENT_TOKEN, connect=False)
 
 
 @pytest.fixture()

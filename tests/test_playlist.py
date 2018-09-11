@@ -51,6 +51,7 @@ def test_create_playlist(plex, show):
 
 @pytest.mark.client
 def test_playlist_play(plex, client, artist, album):
+    client.proxyThroughServer(server=plex)
     try:
         playlist_name = 'test_play_playlist'
         playlist = plex.createPlaylist(playlist_name, album)
@@ -85,6 +86,7 @@ def test_playlist_playQueue(plex, album):
 
 @pytest.mark.client
 def test_play_photos(plex, client, photoalbum):
+    client.proxyThroughServer(server=plex)
     photos = photoalbum.photos()
     for photo in photos[:4]:
         client.playMedia(photo)

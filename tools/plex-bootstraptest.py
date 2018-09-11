@@ -20,6 +20,7 @@ from plexapi.utils import download, SEARCHTYPES
 
 DOCKER_CMD = [
     'docker', 'run', '-d',
+    '--net', '%(network)s',
     '--name', 'plex-test-%(image_tag)s',
     '--restart', 'on-failure',
     '-p', '32400:32400/tcp',
@@ -169,6 +170,7 @@ if __name__ == '__main__':
     parser.add_argument('--without-photos', help='Do not create Photos section', default=True, dest='with_photos',
                         action='store_false')
     parser.add_argument('--show-token', help='Display access token after bootstrap', default=False, action='store_true')
+    parser.add_argument('--docker-network', help='Docker network name to place the server', default='plex-test')
     opts = parser.parse_args()
     print('I`m going to create a plex instance named %s with advertised ip "%s", be prepared!' % (opts.server_name,
                                                                                                   opts.advertise_ip))
@@ -189,6 +191,7 @@ if __name__ == '__main__':
         'timezone': opts.timezone,
         'advertise_ip': opts.advertise_ip,
         'image_tag': opts.docker_tag,
+        'network': opts.docker_network,
     }
     docker_cmd = [c % arg_bindings for c in DOCKER_CMD]
     exit_code = call(docker_cmd)
