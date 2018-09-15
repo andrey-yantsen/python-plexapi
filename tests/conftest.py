@@ -105,7 +105,7 @@ def plex(request):
     if request.param == TEST_AUTHENTICATED:
         from _pytest.compat import get_real_func
         get_account = get_real_func(account)
-        token = get_account.authenticationToken
+        token = get_account().authenticationToken
     else:
         token = None
     return PlexServer(SERVER_BASEURL, token, session=session)
