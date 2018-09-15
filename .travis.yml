@@ -2,8 +2,7 @@ language: python
 
 stages:
   - syntax
-  - name: test
-    if: type != pull_request
+  - test
   - name: deploy
     if: tag = present
 
@@ -21,6 +20,7 @@ env:
     - PLEXAPI_AUTH_SERVER_BASEURL=http://127.0.0.1:32400
   matrix:
     - PLEX_CONTAINER_TAG=latest
+    - PLEX_CONTAINER_TAG=latest PLEXAPI_AUTH_MYPLEX_USERNAME=""
 
 before_install:
   - pip install --upgrade pip
@@ -28,8 +28,10 @@ before_install:
   - pip install --upgrade pytest pytest-cov coveralls
 install:
   - pip install -r requirements_dev.txt
-  - PYTHONPATH="$PWD:$PYTHONPATH" python -u tools/plex-bootstraptest.py --destination plex --advertise-ip=127.0.0.1
-    --bootstrap-timeout 540 --docker-tag $PLEX_CONTAINER_TAG
+  - '[ -z "${PLEXAPI_AUTH_MYPLEX_USERNAME}" ] && PYTHONPATH="$PWD:$PYTHONPATH" python -u tools/plex-bootstraptest.py
+     --destination plex --advertise-ip=127.0.0.1 --bootstrap-timeout 540 --docker-tag $PLEX_CONTAINER_TAG --unclaimed ||
+     PYTHONPATH="$PWD:$PYTHONPATH" python -u tools/plex-bootstraptest.py --destination plex --advertise-ip=127.0.0.1
+    --bootstrap-timeout 540 --docker-tag $PLEX_CONTAINER_TAG'
 
 script:
   - py.test tests -rxXs --ignore=tests/test_sync.py --tb=native --verbose --cov-config .coveragerc --cov=plexapi
@@ -41,7 +43,7 @@ after_success:
   - coveralls
 
 after_script:
-  - PYTHONPATH="$PWD:$PYTHONPATH" python -u tools/plex-teardowntest.py
+  - '[ -z "${PLEXAPI_AUTH_MYPLEX_USERNAME}" ] || PYTHONPATH="$PWD:$PYTHONPATH" python -u tools/plex-teardowntest.py'
 
 jobs:
   include:
